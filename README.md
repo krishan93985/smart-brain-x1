@@ -4,4 +4,4 @@ clone this repo\
 run npm install\
 run npm start
 
-See live example: https://smart-brain-x1.herokuapp.com/
+Website is live at: https://smart-brain-x1.herokuapp.com/
