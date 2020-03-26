@@ -1,0 +1,18 @@
+.nav{
+    display: flex;
+    justify-content: flex-end;
+    text-decoration: underline;
+    height:60px;
+}
+
+.para{
+    padding:20px;
+    font-size: larger;
+    font-weight: 550;
+    color:black;
+    cursor: pointer;
+}
+
+.para:hover{
+    color:rgb(100, 98, 98);
+}
