@@ -2,4 +2,4 @@
 
 clone this repo\
 run npm install\
-run npm start\
+run npm start
