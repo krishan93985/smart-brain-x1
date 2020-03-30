@@ -1,18 +1,20 @@
-.nav{
+.navigation{
     display: flex;
     justify-content: flex-end;
-    text-decoration: underline;
-    height:60px;
+    height:16vh;
+    margin:0 15px 0 15px;
 }
 
 .para{
     padding:20px;
-    font-size: larger;
+    text-align: center;
+    font-size: 22px;
     font-weight: 550;
     color:black;
     cursor: pointer;
 }
 
 .para:hover{
-    color:rgb(100, 98, 98);
+    transform:scale(1.05);
+    text-decoration: underline;
 }

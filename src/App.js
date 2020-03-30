@@ -8,6 +8,7 @@ import Rank from './components/Rank/Rank';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import SignIn from './components/SignIn/SignIn';
 import Register from './components/Register/Register';
+import Profile from './components/Profile/Profile';
 
 const parameters={
   particles:{
@@ -26,14 +27,13 @@ const initialState = {   //Better way for multiple users in a huge app
   imageUrl:'',
   faceArray:[],
   route:'signout',
-  isSignedIn:false,
   user:{
     id:'',
     name:'',
     email:'',
     password:'',
     entries:0,
-    date:''
+    joined:''
   }
 }
 
@@ -43,6 +43,35 @@ class App extends React.Component {
     this.state=initialState;
   }
 
+  loadUser = (data) => {
+    this.setState({user:data});
+  }
+
+  onInputChange = (event) =>{
+    this.setState({input:event.target.value});
+  }
+  
+  onRouteChange = (route) => {
+    if(route === 'signout')
+    this.setState(initialState)
+    else if(route === 'profile')
+    {
+      fetch(`https://evening-castle-93461.herokuapp.com/profile/${this.state.user.id}`,{
+        method:'get',
+        headers:{'Content-type':'application/json'}
+      }).then(response => response.json())
+      .then(user => {
+        if(user.id)
+        this.loadUser(user);
+        else
+        alert('Cannot Get Profile!')
+      })
+      .catch(console.log);
+    }
+    this.setState({route:route});
+  }
+
+  
   calculateFaceBox = (DATA) => {
     const faces = DATA.outputs[0].data.regions.map(face => {
     const data = face.region_info.bounding_box;
@@ -57,22 +86,6 @@ class App extends React.Component {
     }
   });
     this.setState({faceArray:faces});
-  }
-
-  loadUser = (data) => {
-    this.setState({user:data});
-  }
-
-  onInputChange = (event) =>{
-    this.setState({input:event.target.value});
-  }
-  
-  onRouteChange = (route) => {
-    if(route === 'signout')
-    this.setState(initialState)
-    else if(route === 'home')
-    this.setState({isSignedIn:true})
-    this.setState({route:route});
   }
 
   onButtonSubmit = () => {
@@ -103,18 +116,39 @@ class App extends React.Component {
     .catch(error =>console.log(error));
     }
 
+  deleteUser = () => {
+    if(window.confirm('Are you Sure you want to remove Account!!'))
+    {
+        fetch(`https://evening-castle-93461.herokuapp.com/profile/delete/${this.state.user.id}`,{
+        method:'delete',
+        headers:{'Content-type':'application/json'},
+      }).then(response => response.json())
+      .then(message => {
+        if(message==='success')
+        {
+        this.onRouteChange('signout');
+        alert('Account Removed');
+        }
+        else
+        alert('Unable to Remove Account!')
+      })
+      .catch(console.log);
+    }
+    }
+
   render(){
-    const { imageUrl,faceArray,route,isSignedIn,user} = this.state;
+    const { imageUrl,faceArray,route,user} = this.state;
   return (
     <div className="App">
       <Particles className='particles' params={parameters}/>
-      <Navbar onRouteChange={this.onRouteChange} isSignedIn={isSignedIn}/>
+      <Navbar onRouteChange={this.onRouteChange} route={route} onDelete={this.deleteUser}/>
       {route === 'signout'?
       <SignIn loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
      : (route === 'register')?
      <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
-     :
-      <div>
+     :(route === 'profile')?
+     <Profile user={user}  loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
+     :<div>
       <Logo/>
       <Rank name={user.name} entries={user.entries}/>
       <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit}/>
