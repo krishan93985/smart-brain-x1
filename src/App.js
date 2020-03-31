@@ -71,9 +71,8 @@ class App extends React.Component {
     this.setState({route:route});
   }
 
-  
-  calculateFaceBox = (DATA) => {
-    const faces = DATA.outputs[0].data.regions.map(face => {
+  calculateFaceBox = (regions) => {
+    const faces = regions.map(face => {
     const data = face.region_info.bounding_box;
     const image = document.getElementById('pic');
     const height = Number(image.height);
@@ -87,9 +86,22 @@ class App extends React.Component {
   });
     this.setState({faceArray:faces});
   }
+   
+  checkImageExists = (url,callBack) => {
+     let image = new Image();
+     image.onload = () => {
+       callBack(true);
+     }
+     image.onerror = () => {
+       callBack(false);
+     }
+     image.src = url;
+   }
 
   onButtonSubmit = () => {
-    this.setState({imageUrl:this.state.input});
+    this.checkImageExists(this.state.input,(imageExists) => {
+      if(imageExists){
+      this.setState({imageUrl:this.state.input});
     fetch('https://evening-castle-93461.herokuapp.com/imageurl',{
       method:'post',
       headers:{'Content-type':'application/json'},
@@ -98,6 +110,8 @@ class App extends React.Component {
       })
     }).then(response => response.json())
     .then(response => {
+      console.log(response)
+      const DATA = response.outputs[0].data;
       if(response)
       {
         fetch('https://evening-castle-93461.herokuapp.com/image',{
@@ -110,10 +124,19 @@ class App extends React.Component {
     .then(resp => resp.json())
     .then(resp => this.setState(Object.assign(this.state.user,{entries:resp})))
     .catch(error =>console.log(error));
-    this.calculateFaceBox(response)
-     }  
+      }
+    if(DATA.regions)
+    this.calculateFaceBox(DATA.regions)
+    else{
+      this.setState({faceArray:[]})
+    } 
   })   
-    .catch(error =>console.log(error));
+    .catch(error => { this.setState({faceArray:[]});console.log(error)});
+    }
+    else {
+      alert('image Url does not exist!')
+    }
+  })
     }
 
   deleteUser = () => {
