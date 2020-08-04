@@ -18,3 +18,9 @@
     transform:scale(1.05);
     text-decoration: underline;
 }
+
+@media only screen and (max-width:350px){
+    .para{
+        cursor:none;
+    }
+}

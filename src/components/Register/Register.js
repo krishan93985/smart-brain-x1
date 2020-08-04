@@ -23,6 +23,10 @@ class Register extends React.Component{
   }
 
   onRegister = () => {
+    if(!this.state.registerName || !this.state.registerEmail || !this.state.registerPassword){
+      alert('Cannot Register an empty user!');
+      return;
+    }
     fetch('https://evening-castle-93461.herokuapp.com/register',{
       method:'post',
       headers:{'Content-type':'application/json'},
@@ -53,11 +57,11 @@ class Register extends React.Component{
            <legend className="f2 fw6 ph0 mh0">Register</legend>
            <div className="mt3">
              <label className="db fw6 lh-copy f6" htmlFor="name">Name</label>
-             <input onChange={this.onNameChange} className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="text" name="name"  id="name"/>
+             <input onChange={this.onNameChange} className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="text" name="name"  id="name" autoComplete="off"/>
            </div>
            <div className="mt3">
              <label className="db fw6 lh-copy f6" htmlFor="email-address">Email</label>
-             <input onChange={this.onEmailChange} className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="email" name="email-address"  id="email-address"/>
+             <input onChange={this.onEmailChange} className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="email" name="email-address"  id="email-address" autoComplete="off"/>
            </div>
            <div className="mv3">
              <label className="db fw6 lh-copy f6" htmlFor="password">Password</label>
