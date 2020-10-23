@@ -1,0 +1,35 @@
+.profile-modal{
+    background-color: rgba(255,255,255,0.8);
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pa-left{
+    padding-left: 1.2rem;
+}
+
+.modal-close{
+    font-size:3rem;
+    margin-right:0.5rem;
+    cursor: pointer;
+    width:2rem;
+    height:2rem;
+}
+
+.control-width{
+    max-width:90%;
+}
+
+.modal-close:hover{
+    color:grey;
+}
+
+.br-none:focus{
+    outline: none;
+}

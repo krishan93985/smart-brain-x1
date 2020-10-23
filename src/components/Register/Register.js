@@ -1,8 +1,9 @@
 import React from 'react';
+import './Register.css';
 
 class Register extends React.Component{
   constructor(props){
-    super(props);
+    super();
     this.state = {
       registerName:'',
       registerEmail:'',
@@ -27,7 +28,7 @@ class Register extends React.Component{
       alert('Cannot Register an empty user!');
       return;
     }
-    fetch('https://evening-castle-93461.herokuapp.com/register',{
+    fetch('https://smart-brain-x1-dockerize.herokuapp.com/register',{
       method:'post',
       headers:{'Content-type':'application/json'},
       body:JSON.stringify({
@@ -36,36 +37,35 @@ class Register extends React.Component{
         password:this.state.registerPassword
       })
     }).then(response => response.json())
-    .then(user => {
-      if(user.id)
-      {
-      this.props.loadUser(user);
-      this.props.onRouteChange('home');
+    .then(data => {
+      if(data.userId && data.success){
+        this.props.saveAuthTokenInLocalStorage(data.token);
+        this.props.getUserProfile(data.userId);
       }
       else
-      alert('Cannot Register an Empty user!')
+        alert('Cannot Register an Empty user!')
     })
     .catch(console.log);
   }
 
   render(){
     return(
-      <article className="br3 ba b--black-10 shadow-5 mv4 w-100 w-50-m w-25-l mw6 center">
+      <article className="br3 ba b--black-10 shadow-5 mv4 w-50-m w-25-l mw6 center width-over">
       <main className="pa4 black-80">
        <div className="measure">
          <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
            <legend className="f2 fw6 ph0 mh0">Register</legend>
            <div className="mt3">
              <label className="db fw6 lh-copy f6" htmlFor="name">Name</label>
-             <input onChange={this.onNameChange} className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="text" name="name"  id="name" autoComplete="off"/>
+             <input onChange={this.onNameChange} className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100 focus-black" type="text" name="name"  id="name" autoComplete="off"/>
            </div>
            <div className="mt3">
              <label className="db fw6 lh-copy f6" htmlFor="email-address">Email</label>
-             <input onChange={this.onEmailChange} className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="email" name="email-address"  id="email-address" autoComplete="off"/>
+             <input onChange={this.onEmailChange} className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100 focus-black" type="email" name="email-address"  id="email-address" autoComplete="off"/>
            </div>
            <div className="mv3">
              <label className="db fw6 lh-copy f6" htmlFor="password">Password</label>
-             <input onChange={this.onPasswordChange} className="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="password" name="password"  id="password"/>
+             <input onChange={this.onPasswordChange} className="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100 focus-black" type="password" name="password"  id="password"/>
            </div>
          </fieldset>
          <div className="">

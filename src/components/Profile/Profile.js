@@ -1,94 +1,114 @@
-import React from 'react';
+import React, {useState} from "react";
+import "./Profile.css";
 
-class Profile extends React.Component{
-  constructor(props){
-    super(props);
-    this.state = {
-      updateName:this.props.user.name,
-      updateEmail:this.props.user.email,
-      updatePassword:''
+const Profile = ({ toggleProfile, user, loadUser, onDelete }) => {
+  const [name,setUserName] = useState(user.name);
+  const [age,setUserAge] = useState(user.age);
+  const [pet,setPetName] = useState(user.pet);
+
+  const updateUserProfile = (data) => {
+    if(!name){
+      return alert('Name Cannot Be Empty!');
     }
-  }
 
-  onNameChange = (event) => {
-    this.setState({updateName:event.target.value})
-  }
-
-  onEmailChange = (event) => {
-    this.setState({updateEmail:event.target.value})
-  }
-
-  onPasswordChange = (event) => {
-    this.setState({updatePassword:event.target.value})
-  }
-
-  onUpdate = () => {
-    const {updateEmail,updateName,updatePassword} = this.state;
-    if(updateName && updateEmail && updatePassword)
-    {
-    fetch(`https://evening-castle-93461.herokuapp.com/profile/update/${this.props.user.id}`,{
+    fetch(`https://smart-brain-x1-dockerize.herokuapp.com/profile/${user.id}`, {
       method:'put',
-      headers:{'Content-type':'application/json'},
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":`Bearer ${window.localStorage.getItem('token')}`
+      },
       body:JSON.stringify({
-        name:updateName,
-        email:updateEmail,
-        password:updatePassword
+        formInput:{
+        name,
+        age,
+        pet
+        }
       })
     }).then(response => response.json())
-    .then(user => {
-      if(user.id)
-      {
-      this.props.loadUser(user);
-      this.props.onRouteChange('home');
-      }
-      else
-      alert('Error Updating Profile!')
+    .then(response => {
+        if(response === 'success'){
+          const updatedUser = Object.assign(user,data);
+          loadUser(updatedUser); //or simply pass {...user,...data}
+          toggleProfile();
+        } else if(response === 'Unauthorized')
+            this.props.onRouteChange('signout')
+          else
+            alert('Unable to update profile!')
     })
-    .catch(console.log);
-  }
-  else {
-    alert('Can\'t Update with an empty field!')
-  }
+    .catch(err => alert('Unable to update profile!'))
   }
 
-  render(){
-      const {name,email,entries,joined} = this.props.user;
-    return(
-      <article className="mt5 br3 ba b--black-10 shadow-5 mv4 w-100 w-50-m w-25-l mw6 center">
-      <main className="pa4 black-80">
-       <div className="measure">
-         <fieldset className="ba b--transparent ph0 mh0">
-           <legend className="f2 fw6 ph0 mh0">Profile</legend>
-           <div className="mt3">
-             <label className="db fw6 lh-copy f6" htmlFor="name">Name</label>
-             <input onChange={this.onNameChange} defaultValue={name} className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="text" name="name"  id="name"/>
-           </div>
-           <div className="mt3">
-             <label className="db fw6 lh-copy f6" htmlFor="email-address">Email</label>
-             <input onChange={this.onEmailChange} defaultValue={email} className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="email" name="email-address"  id="email-address"/>
-           </div>
-           <div className="mv3">
-             <label className="db fw6 lh-copy f6" htmlFor="password">Password</label>
-             <input onChange={this.onPasswordChange} className="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="password" name="password"  id="password"/>
-           </div>
-           <div className="mt3">
-             <label className="db fw6 lh-copy f6" htmlFor="entries">Entry Count</label>
-             <p className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100">{entries}</p>
-           </div>
-           <div className="mt3">
-             <label className="db fw6 lh-copy f6" htmlFor="entries">Joining Date</label>
-             <p className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100">{joined}</p>
-           </div>
-         </fieldset>
-         <div>
-           <input onClick={this.onUpdate} className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib" type="submit" value="Update"/>
-         </div>
-       </div>
-     </main>
-     </article>
-         )
-  }
-   
-}
+  return (
+    <div className="profile-modal">
+      <article className="pa-left br3 ba b--black-10 shadow-5 mv4 w-50-m w-30-l center bg-white">
+        <main className="pa4 black-80 control-width">
+          <img
+            src="https://tachyons.io/img/logo.jpg"
+            className="ba h3 w3 dib"
+            alt="avatar"
+          />
+          <h1 style={{overflow:"hidden"}}>{name}</h1>
+          <h4>Images Submitted: {user.entries}</h4>
+          <p>Member Since: {new Date(user.joined).toLocaleDateString()}</p>
+            <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
+              <label className="mt2 fw6" htmlFor="user-name">
+                Name
+              </label>
+              <input
+                onChange={(event) => setUserName(event.target.value)}
+                className="pa2 ba w-100"
+                type="text"
+                placeholder={name}
+                name="user-name"
+                id="user-name"
+                maxLength="40"
+                autoComplete="off"
+              />
+              <label className="mt2 fw6" htmlFor="age">
+                Age
+              </label>
+              <input
+                onChange={(event) => setUserAge(event.target.value)}
+                className="pa2 ba w-100"
+                type="text"
+                name="age"
+                id="age"
+                maxLength="3"
+                placeholder={user.age}
+                autoComplete="off"
+              />
+              <label className="mt2 fw6" htmlFor="pet-name">
+                Pet
+              </label>
+              <input
+                onChange={(event) => setPetName(event.target.value)}
+                className="pa2 ba w-100"
+                type="text"
+                name="pet-name"
+                id="pet-name"
+                maxLength="30"
+                placeholder={user.pet}
+              />
+              <div className="mt4" style={{ display:'flex', justifyContent:'space-evenly'}}>
+                <button className="b pa2 grow pointer hover-white w-40 bg-light-blue b--black-20 br-none"
+                  onClick={() => updateUserProfile({name,age,pet})}>
+                  Save
+                </button>
+                <button onClick={toggleProfile} className="b pa2 grow pointer hover-white w-40 bg-light-red b--black-20 br-none">
+                  Cancel
+                </button>
+              </div>
+              <div className="mt4" style={{ display:'flex', justifyContent:'space-evenly'}}>
+                <button onClick={onDelete} className="b pa1 grow pointer hover-white w-50 bg-light-red b--black-20 br-none">
+                  <span style={{ color:'yellow' }} >&#9888;</span> Remove Account
+                </button>
+              </div>
+            </fieldset>
+        </main>
+        <span className="modal-close" onClick={toggleProfile} >&times;</span> 
+      </article>
+    </div>
+  );
+};
 
 export default Profile;

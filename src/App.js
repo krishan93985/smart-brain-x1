@@ -9,6 +9,7 @@ import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import SignIn from './components/SignIn/SignIn';
 import Register from './components/Register/Register';
 import Profile from './components/Profile/Profile';
+import Modal from './components/Modal/Modal';
 
 const parameters={
   particles:{
@@ -26,14 +27,17 @@ const initialState = {   //Better way for multiple users in a huge app
   input:'',
   imageUrl:'',
   faceArray:[],
-  route:'signout',
+  route:'',
+  isProfileOpen: false,
   user:{
     id:'',
     name:'',
     email:'',
     password:'',
     entries:0,
-    joined:''
+    joined:'',
+    pet:'',
+    age:''
   }
 }
 
@@ -43,31 +47,96 @@ class App extends React.Component {
     this.state=initialState;
   }
 
+  componentDidMount = () => {
+    const token = window.localStorage.getItem('token');
+    if(token){
+      fetch('https://smart-brain-x1-dockerize.herokuapp.com/signin', {
+        method:'post',
+        headers:{
+          'Content-Type':'application/json',
+          'Authorization':`Bearer ${token}`
+        }
+      }).then(res => res.json())
+      .then(data => {
+        if(data && data.userId)
+          this.getUserProfile(data.userId);
+        else{
+          this.onRouteChange('signout');
+          this.removeAuthToken();
+        }
+      }).catch(() => {
+        this.onRouteChange('signout');
+        this.removeAuthToken();
+       })
+    } else{
+      this.onRouteChange('signout');
+    }
+  }
+
+  getUserProfile = (userId) => {
+    fetch(`https://smart-brain-x1-dockerize.herokuapp.com/profile/${userId}`, {
+      method:'get',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':`Bearer ${window.localStorage.getItem('token')}`
+      }
+    }).then(res => res.json())
+    .then(user => {
+      if(user.email && user.id)
+          this.loadUser(user);
+      else{
+          this.onRouteChange('signout')
+          this.removeAuthToken();
+        }
+    }).catch(() => {
+       this.onRouteChange('signout');
+       this.removeAuthToken();
+      })
+  }
+
+  revokeUserSession = () => {
+    fetch(`https://smart-brain-x1-dockerize.herokuapp.com/signout/${this.state.user.id}`, {
+      method:'delete',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':`Bearer ${window.localStorage.getItem('token')}`
+      }
+    }).then(res => res.json())
+    .then(data => {
+      if(data.success){
+        this.removeAuthToken();
+        this.onRouteChange('signout');
+      }
+    }).catch(err => this.onRouteChange('signout'))
+  }
+
+  removeAuthToken = () => window.localStorage.getItem('token')
+                         && window.localStorage.removeItem('token');
+
+  saveAuthTokenInLocalStorage = (token) => {
+    window.localStorage.setItem('token',token);
+  }
+
   loadUser = (data) => {
-    this.setState({user:data});
+    this.setState({user:data},() => {
+      return this.onRouteChange('home');
+    });
   }
 
   onInputChange = (event) =>{
     this.setState({input:event.target.value});
   }
   
+  toggleProfile = () => {
+    this.setState(prevState => ({
+      isProfileOpen: !prevState.isProfileOpen
+    }))
+  }
+
   onRouteChange = (route) => {
     if(route === 'signout')
-    this.setState(initialState)
-    else if(route === 'profile')
-    {
-      fetch(`https://evening-castle-93461.herokuapp.com/profile/${this.state.user.id}`,{
-        method:'get',
-        headers:{'Content-type':'application/json'}
-      }).then(response => response.json())
-      .then(user => {
-        if(user.id)
-        this.loadUser(user);
-        else
-        alert('Cannot Get Profile!')
-      })
-      .catch(console.log);
-    }
+      this.setState(initialState)
+
     this.setState({route:route});
   }
 
@@ -101,40 +170,44 @@ class App extends React.Component {
   onButtonSubmit = () => {
     this.checkImageExists(this.state.input,(imageExists) => {
       if(imageExists){
-      this.setState({imageUrl:this.state.input});
-    fetch('https://evening-castle-93461.herokuapp.com/imageurl',{
+      this.setState({imageUrl:this.state.input},() => this.setState({faceArray:[]}));
+    fetch('https://smart-brain-x1-dockerize.herokuapp.com/imageurl',{
       method:'post',
-      headers:{'Content-type':'application/json'},
+      headers:{
+        'Content-type':'application/json',
+        'Authorization':`Bearer ${window.localStorage.getItem('token')}`
+      },
       body:JSON.stringify({
         input:this.state.input
       })
     }).then(response => response.json())
     .then(response => {
-      console.log(response)
-      const DATA = response.outputs[0].data;
-      if(response)
+      const DATA = response.outputs && response.outputs[0].data;
+      if(response.outputs)
       {
-        fetch('https://evening-castle-93461.herokuapp.com/image',{
+        fetch('https://smart-brain-x1-dockerize.herokuapp.com/image',{
         method:'put',
-        headers:{'Content-type':'application/json'},
+        headers:{
+          'Content-type':'application/json',
+          'Authorization':`Bearer ${window.localStorage.getItem('token')}`
+        },
         body:JSON.stringify({
         id:this.state.user.id
-     }) 
-    })
-    .then(resp => resp.json())
-    .then(resp => this.setState(Object.assign(this.state.user,{entries:resp})))
-    .catch(error =>console.log(error));
+        }) 
+        })
+      .then(resp => resp.json())
+      .then(resp => this.setState(Object.assign(this.state.user,{entries:resp})))
+      .catch(error =>console.log(error));
       }
-    if(DATA.regions)
-    this.calculateFaceBox(DATA.regions)
-    else{
-      this.setState({faceArray:[]})
-    } 
+      if(DATA && DATA.regions)
+        this.calculateFaceBox(DATA.regions)
+      else
+        alert('Enter a valid img')
   })   
-    .catch(error => { this.setState({faceArray:[]});console.log(error)});
+    .catch(error => alert('Enter a valid img'));
     }
     else {
-      alert('image Url does not exist!')
+      alert('Invalid image Url!')
     }
   })
     }
@@ -142,41 +215,49 @@ class App extends React.Component {
   deleteUser = () => {
     if(window.confirm('Are you Sure you want to remove Account!!'))
     {
-        fetch(`https://evening-castle-93461.herokuapp.com/profile/delete/${this.state.user.id}`,{
+        fetch(`https://smart-brain-x1-dockerize.herokuapp.com/profile/delete/${this.state.user.id}`,{
         method:'delete',
-        headers:{'Content-type':'application/json'},
+        headers:{
+          'Content-type':'application/json',
+          'Authorization':`Bearer ${window.localStorage.getItem('token')}`
+        }
       }).then(response => response.json())
       .then(message => {
-        if(message==='success')
-        {
-        this.onRouteChange('signout');
-        alert('Account Removed');
+        if(message==='success' || message==='Unauthorized'){
+          this.onRouteChange('signout');
+          this.removeAuthToken();
         }
         else
-        alert('Unable to Remove Account!')
+          alert('Unable to Remove Account!')
       })
       .catch(console.log);
     }
     }
 
   render(){
-    const { imageUrl,faceArray,route,user} = this.state;
+    const { imageUrl,faceArray,route,user,isProfileOpen} = this.state;
   return (
     <div className="App">
-      <Particles className='particles' params={parameters}/>
-      <Navbar onRouteChange={this.onRouteChange} route={route} onDelete={this.deleteUser}/>
+      { route !== '' && (<div>
+        <Particles className='particles' params={parameters}/>
+        <Navbar onRouteChange={this.onRouteChange} route={route} toggleProfile={this.toggleProfile} revokeUserSession={this.revokeUserSession} />
+      </div>)
+      }
+      { isProfileOpen &&
+      <Modal>
+        <Profile toggleProfile={this.toggleProfile} user={user} loadUser={this.loadUser} onDelete={this.deleteUser} />
+      </Modal>
+      }
       {route === 'signout'?
-      <SignIn loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
+      <SignIn loadUser={this.loadUser} onRouteChange={this.onRouteChange} getUserProfile={this.getUserProfile} saveAuthTokenInLocalStorage={this.saveAuthTokenInLocalStorage} />
      : (route === 'register')?
-     <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
-     :(route === 'profile')?
-     <Profile user={user}  loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
-     :<div>
+     <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} getUserProfile={this.getUserProfile} saveAuthTokenInLocalStorage={this.saveAuthTokenInLocalStorage} />
+     :(route === 'home')?<div>
       <Logo/>
       <Rank name={user.name} entries={user.entries}/>
       <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit}/>
       <FaceRecognition url={imageUrl} faceArray={faceArray} facekey={user.id}/>
-      </div>
+      </div> : null
       }
     </div>
   );
