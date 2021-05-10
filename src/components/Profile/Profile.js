@@ -16,7 +16,7 @@ const Profile = ({ toggleProfile, user, loadUser, onDelete, profileUrl, uploadPr
     event.preventDefault();
     setProfileSavePending(true);
     target.disabled = true;
-    fetch(`http://localhost:3000/profile/${user.id}`, {
+    fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/profile/${user.id}`, {
       method:'put',
       headers:{
         "Content-Type":"application/json",
