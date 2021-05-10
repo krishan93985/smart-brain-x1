@@ -239,7 +239,7 @@ class App extends React.Component {
       })
     }).then(response => response.json())
     .then(response => {
-      console.log(response)
+      //console.log(response)
       const DATA = response.outputs && response.outputs[0].data;
       if(response.outputs)
       {
@@ -310,7 +310,7 @@ class App extends React.Component {
       for(var i = 0; i < arr.length; i++)
       header += arr[i].toString(16);
     }
-    console.log(header);
+    //console.log(header);
     switch (header) {
         case "89504e47":
             type = "image/png";
@@ -347,7 +347,7 @@ class App extends React.Component {
     
     toBase64Url = (event) => {
       const dataUrl = this.getDataUrl(event.currentTarget);
-      console.log(dataUrl)
+      //console.log(dataUrl)
       this.setState({base64ProfileImgUrl:dataUrl});
     }
     
@@ -373,7 +373,7 @@ class App extends React.Component {
       }).then(response => response.json())
       .then(response => {
         if(response.url){
-          console.log(response.url)
+          //console.log(response.url)
           const updatedUser = Object.assign(this.state.user,{profileUrl:response.url});
           this.setState({defaultProfileImg:false});
           this.loadUser(updatedUser);
