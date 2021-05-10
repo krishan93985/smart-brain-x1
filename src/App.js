@@ -2,11 +2,11 @@ import React, {lazy,Suspense} from 'react';
 import './App.css';
 import Particles from 'react-tsparticles';
 import Navbar from './components/Navbar/Navbar';
-import SignIn from './components/SignIn/SignIn';
 import Profile from './components/Profile/Profile';
 import Modal from './components/Modal/Modal';
 import Loader from './components/Loader/Loader';
 import url from './components/Profile/profile.png';
+const SignIn = lazy(() => import('./components/SignIn/SignIn'));
 const Register = lazy(() => import('./components/Register/Register'));
 const Home = lazy(() => import('./components/Home/Home'));
 
@@ -97,7 +97,7 @@ class App extends React.Component {
         this.removeAuthToken();
        })
     } else{
-      this.onRouteChange('home');
+      this.onRouteChange('signout');
     }
   }
 
@@ -432,7 +432,9 @@ class App extends React.Component {
       </Modal>
       }
       {route === 'signout'?
-      <SignIn loadUser={this.loadUser} onRouteChange={this.onRouteChange} getUserProfile={this.getUserProfile} saveAuthTokenInLocalStorage={this.saveAuthTokenInLocalStorage} isLoading={isLoading} setLoading={this.setLoading}/>
+      <Suspense fallback={<Loader/>}>
+        <SignIn loadUser={this.loadUser} onRouteChange={this.onRouteChange} getUserProfile={this.getUserProfile} saveAuthTokenInLocalStorage={this.saveAuthTokenInLocalStorage} isLoading={isLoading} setLoading={this.setLoading}/>
+      </Suspense>
      : (route === 'register')?
      <Suspense fallback={<Loader/>}>
         <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} getUserProfile={this.getUserProfile} saveAuthTokenInLocalStorage={this.saveAuthTokenInLocalStorage} defaultUrl={this.state.user.profileUrl} isLoading={isLoading} setLoading={this.setLoading} />
