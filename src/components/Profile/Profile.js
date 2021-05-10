@@ -1,17 +1,22 @@
 import React, {useState} from "react";
+import UploadProfile from "../UploadProfile/UploadProfile";
 import "./Profile.css";
 
-const Profile = ({ toggleProfile, user, loadUser, onDelete }) => {
+const Profile = ({ toggleProfile, user, loadUser, onDelete, profileUrl, uploadProfileImage, toBase64Url, removeProfileImage, defaultProfileImg, profilePicUploadPending, profilePicRemovePending }) => {
   const [name,setUserName] = useState(user.name);
   const [age,setUserAge] = useState(user.age);
   const [pet,setPetName] = useState(user.pet);
+  const [profileSavePending,setProfileSavePending] = useState(false);
 
-  const updateUserProfile = (data) => {
+  const updateUserProfile = (event,data) => {
     if(!name){
       return alert('Name Cannot Be Empty!');
     }
-
-    fetch(`https://smart-brain-x1-dockerize.herokuapp.com/profile/${user.id}`, {
+    const {target} = event;
+    event.preventDefault();
+    setProfileSavePending(true);
+    target.disabled = true;
+    fetch(`http://localhost:3000/profile/${user.id}`, {
       method:'put',
       headers:{
         "Content-Type":"application/json",
@@ -34,22 +39,27 @@ const Profile = ({ toggleProfile, user, loadUser, onDelete }) => {
             this.props.onRouteChange('signout')
           else
             alert('Unable to update profile!')
+        setProfileSavePending(false);
+        target.disabled = false;
     })
     .catch(err => alert('Unable to update profile!'))
   }
 
   return (
     <div className="profile-modal">
+    <div className="contain">
       <article className="pa-left br3 ba b--black-10 shadow-5 mv4 w-50-m w-30-l center bg-white">
         <main className="pa4 black-80 control-width">
           <img
-            src="https://tachyons.io/img/logo.jpg"
-            className="ba h3 w3 dib"
+            src={profileUrl}
+            className="ba h3 w3 dib profile-image"
             alt="avatar"
           />
+          <UploadProfile uploadProfileImage={uploadProfileImage} toBase64Url={toBase64Url} removeProfileImage={removeProfileImage} defaultProfileImg={defaultProfileImg} profilePicRemovePending={profilePicRemovePending} profilePicUploadPending={profilePicUploadPending}/>
           <h1 style={{overflow:"hidden"}}>{name}</h1>
-          <h4>Images Submitted: {user.entries}</h4>
-          <p>Member Since: {new Date(user.joined).toLocaleDateString()}</p>
+          <hr className="separate-profile"/>
+          <h5>Images Submitted: {user.entries}</h5>
+          <h5>Member Since: {new Date(user.joined).toLocaleDateString()}</h5>
             <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
               <label className="mt2 fw6" htmlFor="user-name">
                 Name
@@ -90,23 +100,24 @@ const Profile = ({ toggleProfile, user, loadUser, onDelete }) => {
                 placeholder={user.pet}
               />
               <div className="mt4" style={{ display:'flex', justifyContent:'space-evenly'}}>
-                <button className="b pa2 grow pointer hover-white w-40 bg-light-blue b--black-20 br-none"
-                  onClick={() => updateUserProfile({name,age,pet})}>
-                  Save
+                <button id="save_btn touch-conf" className="b pa2 grow pointer hover-white w-40 b--black-20 br-none btn_color"
+                  onClick={(event) => updateUserProfile(event,{name,age,pet})}>
+                  { profileSavePending ? <div className="extended-loader-wrapper"><div className="loader extended-loader"></div></div>:"Save"}
                 </button>
-                <button onClick={toggleProfile} className="b pa2 grow pointer hover-white w-40 bg-light-red b--black-20 br-none">
+                <button onClick={toggleProfile} id="touch-conf"  className="b pa2 grow pointer hover-white w-40 bg-light-red b--black-20 br-none">
                   Cancel
                 </button>
               </div>
               <div className="mt4" style={{ display:'flex', justifyContent:'space-evenly'}}>
-                <button onClick={onDelete} className="b pa1 grow pointer hover-white w-50 bg-light-red b--black-20 br-none">
-                  <span style={{ color:'yellow' }} >&#9888;</span> Remove Account
+                <button onClick={onDelete} id="touch-conf" className="b pa1 grow pointer hover-white w-50 bg-red b--black-20 br-none">
+                <div><span style={{ color:'yellow' }} >&#9888;</span> Remove Account</div>
                 </button>
               </div>
             </fieldset>
         </main>
         <span className="modal-close" onClick={toggleProfile} >&times;</span> 
       </article>
+    </div>
     </div>
   );
 };

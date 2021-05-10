@@ -8,6 +8,17 @@
     display:flex;
     justify-content: center;
     align-items: center;
+    overflow-y:scroll;
+}
+
+.contain{
+    width:100%;
+    height:100%;
+}
+
+.profile-image{
+    border-radius:50%;
+    border:none;
 }
 
 .pa-left{
@@ -32,4 +43,16 @@
 
 .br-none:focus{
     outline: none;
+}
+
+.separate-profile{
+    border:1px solid black;
+}
+
+.btn_color{
+    background:rgba(11, 185, 11, 0.979);
+}
+
+.btn_color:hover{
+    background:rgba(42, 190, 42, 0.979);
 }

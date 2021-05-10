@@ -1,0 +1,25 @@
+.profile-options{
+    width:100%;
+}
+
+.profile-actions{
+    display:flex;
+    flex-flow:row wrap;
+    width:100%;
+}
+
+.add-icon{
+    margin-left:1%;
+    width:2.2rem;
+    height:2.2rem;
+    cursor:pointer;
+}
+
+.image-options{
+    background:white;
+    padding:1rem;
+    position:absolute;
+    border-radius:5px;
+    box-shadow:2px 2px 5px 2px rgb(129, 128, 128);
+    z-index:99;
+}

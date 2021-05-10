@@ -1,8 +1,15 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Courier New', Courier, monospace;
-  background: linear-gradient(89deg, #FF5EDF 0%, #04C8DE 100%);
+  font-family: "Montserrat",Sans-Serif, monospace;
+  text-shadow: 0 0 1px transparent;
+  word-break:break-word;
+  letter-spacing: 1.5px;
+background: rgb(130,173,234);
+background: -moz-radial-gradient(circle, rgba(130,173,234,0.9934027321866247) 0%, rgba(65,9,113,0.8785567938112745) 100%);
+background: -webkit-radial-gradient(circle, rgba(130,173,234,0.9934027321866247) 0%, rgba(65,9,113,0.8785567938112745) 100%);
+background: radial-gradient(circle, rgba(130,173,234,0.9934027321866247) 0%, rgba(65,9,113,0.8785567938112745) 100%);
+filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#82adea",endColorstr="#410971",GradientType=1);
 }
 
 button{
