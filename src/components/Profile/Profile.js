@@ -34,13 +34,17 @@ const Profile = ({ toggleProfile, user, loadUser, onDelete, profileUrl, uploadPr
         if(response === 'success'){
           const updatedUser = Object.assign(user,data);
           loadUser(updatedUser); //or simply pass {...user,...data}
+          target.disabled = false;
           toggleProfile();
-        } else if(response === 'Unauthorized')
-            this.props.onRouteChange('signout')
-          else
+        } else if(response === 'Unauthorized'){
+          target.disabled = false;
+          this.props.onRouteChange('signout')
+        }
+          else{
+            target.disabled = false;
             alert('Unable to update profile!')
+          }
         setProfileSavePending(false);
-        target.disabled = false;
     })
     .catch(err => alert('Unable to update profile!'))
   }
