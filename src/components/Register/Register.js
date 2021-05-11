@@ -60,7 +60,10 @@ class Register extends React.Component{
         alert('Cannot Register an Empty user!')
         this.props.setLoading(false);
       })
-      .catch(err => alert('Error Registering User!'));
+      .catch(err => {
+        this.props.setLoading(false);
+        alert('Error Registering User!')
+      }); 
       target.disabled = false;
   }
 

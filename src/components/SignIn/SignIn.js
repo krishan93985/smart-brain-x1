@@ -51,7 +51,10 @@ class SignIn extends React.Component{
       }
       this.props.setLoading(false);
     }
-    ).catch(err => alert('Error Signing In!'));
+    ).catch(err => {
+      this.props.setLoading(false);
+      alert('Error Signing In!')
+    });
     target.disabled = false;
   }
 

@@ -99,14 +99,13 @@ class App extends React.Component {
     } else{
       this.onRouteChange('signout');
       //booting up server
-      fetch(`${process.env.REACT_APP_SERVER_DOMAIN}`,{
+      fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/`,{
         method:'get',
         headers:{
-          'Content-Type':'application/json',
+          'Content-Type':'text/html',
           'Authorization':`Bearer ${token}`
         }
-      }).then(res => res.json())
-      .then(console.log)
+      }).then(console.log)
       .catch(console.log);
     }
   }
@@ -427,6 +426,7 @@ class App extends React.Component {
     const { imageUrl,faceArray,route,user,isProfileOpen,defaultProfileImg,profilePicRemovePending,profilePicUploadPending,detectFacesPending, isLoading} = this.state;
   return (
     <div className="App">
+      {isLoading && <Loader/>}
       { route !== '' && (<div>
         <Particles className='particles'
           id="tsparticles"
