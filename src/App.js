@@ -98,6 +98,16 @@ class App extends React.Component {
        })
     } else{
       this.onRouteChange('signout');
+      //booting up server
+      fetch(`${process.env.REACT_APP_SERVER_DOMAIN}`,{
+        method:'get',
+        headers:{
+          'Content-Type':'application/json',
+          'Authorization':`Bearer ${token}`
+        }
+      }).then(res => res.json())
+      .then(console.log)
+      .catch(console.log);
     }
   }
 
